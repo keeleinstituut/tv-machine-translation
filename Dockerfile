@@ -1,7 +1,7 @@
 # syntax = docker/dockerfile:1.4.0
 
 FROM composer:latest as composer
-FROM php:8.3.0-fpm-alpine3.19 as runtime
+FROM php:8.5-fpm-alpine3.23 as runtime
 
 COPY --from=composer /usr/bin/composer /usr/bin/composer
 
