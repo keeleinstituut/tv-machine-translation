@@ -48,6 +48,7 @@ class TranslationController extends Controller
 
         $jobs = TranslationJob::query()
             ->where('institution_user_id', $institutionUserId)
+            ->when(isset($filters['id']), fn ($q) => $q->whereIn('id', $filters['id']))
             ->when(isset($filters['status']), fn ($q) => $q->where('status', $filters['status']))
             ->when(isset($filters['type']), fn ($q) => $q->where('type', $filters['type']))
             ->when(isset($filters['provider']), fn ($q) => $q->where('provider', $filters['provider']))

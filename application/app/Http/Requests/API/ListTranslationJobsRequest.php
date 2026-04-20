@@ -20,6 +20,8 @@ class ListTranslationJobsRequest extends FormRequest
         $providers = array_column(ProviderName::cases(), 'value');
 
         return [
+            'id'              => ['sometimes', 'array'],
+            'id.*'            => ['string'],
             'status'          => ['sometimes', 'string', Rule::in($statuses)],
             'type'            => ['sometimes', 'string', Rule::in(['text', 'file'])],
             'provider'        => ['sometimes', 'string', Rule::in($providers)],
