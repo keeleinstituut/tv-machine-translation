@@ -4,11 +4,9 @@ namespace App\Http\Controllers\API;
 
 use App\Enums\ProviderName;
 use App\Http\Controllers\Controller;
-use App\Http\Resources\API\ProviderOptionsResource;
-use App\Http\Resources\API\ProviderResource;
 use App\Services\MachineTranslation\MachineTranslationPickerService;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Resources\Json\ResourceCollection;
+use Illuminate\Support\Facades\Auth;
 use OpenApi\Attributes as OA;
 
 class ProviderController extends Controller
@@ -30,6 +28,7 @@ class ProviderController extends Controller
     public function index(): JsonResponse
     {
         $providers = collect(ProviderName::cases())
+            ->filter(fn (ProviderName $provider) => Auth::hasPrivilege($provider->requiredPrivilege()))
             ->map(function (ProviderName $provider) {
                 $service = $this->picker->pick($provider->value);
 
@@ -61,8 +60,14 @@ class ProviderController extends Controller
     {
         $validProviders = array_column(ProviderName::cases(), 'value');
 
-        if (! in_array($provider, $validProviders)) {
+        if (! \in_array($provider, $validProviders)) {
             return response()->json(['message' => 'Provider not found.'], 404);
+        }
+
+        $providerEnum = ProviderName::from($provider);
+
+        if (! Auth::hasPrivilege($providerEnum->requiredPrivilege())) {
+            abort(403);
         }
 
         $service = $this->picker->pick($provider);

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\API;
 
+use App\Enums\ProviderName;
 use App\Exceptions\TranslationFailedException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\API\ListTranslationJobsRequest;
@@ -82,7 +83,13 @@ class TranslationController extends Controller
     )]
     public function translateText(TranslateTextRequest $request): JsonResponse
     {
-        $data    = $request->validated();
+        $data         = $request->validated();
+        $providerEnum = ProviderName::from($data['provider']);
+
+        if (! Auth::hasPrivilege($providerEnum->requiredPrivilege())) {
+            abort(403);
+        }
+
         $service = $this->picker->pick($data['provider'], (string) (Auth::user()?->institutionId ?? ''));
 
         try {
@@ -137,7 +144,13 @@ class TranslationController extends Controller
     )]
     public function submitFileTranslation(TranslateFileRequest $request): JsonResponse
     {
-        $data    = $request->validated();
+        $data         = $request->validated();
+        $providerEnum = ProviderName::from($data['provider']);
+
+        if (! Auth::hasPrivilege($providerEnum->requiredPrivilege())) {
+            abort(403);
+        }
+
         $service = $this->picker->pick($data['provider'], (string) (Auth::user()?->institutionId ?? ''));
 
         if (! $service->supportsFileTranslation()) {
@@ -233,7 +246,7 @@ class TranslationController extends Controller
         $institutionUserId = (string) (Auth::user()?->institutionUserId ?? '');
 
         if ($institutionUserId !== '' && $job->institution_user_id !== $institutionUserId) {
-            abort(403, 'You are not authorized to access this translation job.');
+            abort(403);
         }
     }
 }
