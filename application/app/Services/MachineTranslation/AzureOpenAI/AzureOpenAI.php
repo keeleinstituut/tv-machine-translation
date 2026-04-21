@@ -4,6 +4,8 @@ namespace App\Services\MachineTranslation\AzureOpenAI;
 
 use App\Enums\ProviderName;
 use App\Enums\TranslationJobStatus;
+use App\Exceptions\TranslationFailedException;
+use App\Models\Setting;
 use App\Models\TranslationJob;
 use App\Services\MachineTranslation\Contracts\MachineTranslationService;
 use Illuminate\Http\UploadedFile;
@@ -11,11 +13,46 @@ use Illuminate\Support\Str;
 
 class AzureOpenAI implements MachineTranslationService
 {
-    private AzureOpenAIApiClient $apiClient;
+    private ?AzureOpenAIApiClient $apiClient = null;
+    private string $institutionId;
 
-    public function __construct()
+    public function __construct(string $institutionId = '')
     {
-        $this->apiClient = new AzureOpenAIApiClient();
+        $this->institutionId = $institutionId;
+    }
+
+    private function resolveApiClient(): AzureOpenAIApiClient
+    {
+        if ($this->apiClient !== null) {
+            return $this->apiClient;
+        }
+
+        if ($this->institutionId !== '') {
+            $settings = Setting::where('institution_id', $this->institutionId)
+                ->where('key', 'LIKE', 'azure_openai_%')
+                ->pluck('value', 'key');
+
+            if ($settings->isEmpty()) {
+                throw new TranslationFailedException(
+                    'Azure OpenAI settings are not configured for this institution.'
+                );
+            }
+
+            $config = [
+                'endpoint'       => $settings->get('azure_openai_endpoint'),
+                'api_key'        => $settings->get('azure_openai_api_key'),
+                'tenant_id'      => $settings->get('azure_openai_tenant_id'),
+                'application_id' => $settings->get('azure_openai_application_id'),
+                'client_secret'  => $settings->get('azure_openai_client_secret'),
+                'deployment'     => $settings->get('azure_openai_deployment'),
+            ];
+        } else {
+            $config = config('machine-translation.azure_openai');
+        }
+
+        $this->apiClient = new AzureOpenAIApiClient($config, $this->institutionId);
+
+        return $this->apiClient;
     }
 
     public function getOptions(): array
@@ -53,7 +90,7 @@ class AzureOpenAI implements MachineTranslationService
         $systemPrompt = str_replace($placeholders, $values, $template['system']);
         $userPrompt   = str_replace($placeholders, $values, $template['user']);
 
-        $translatedText = $this->apiClient->chatCompletion($systemPrompt, $userPrompt);
+        $translatedText = $this->resolveApiClient()->chatCompletion($systemPrompt, $userPrompt);
 
         return TranslationJob::create([
             'id'                  => Str::uuid()->toString(),

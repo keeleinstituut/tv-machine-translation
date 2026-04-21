@@ -10,11 +10,11 @@ use RuntimeException;
 
 readonly class MachineTranslationPickerService
 {
-    public function pick(string $providerName): MachineTranslationService
+    public function pick(string $providerName, string $institutionId = ''): MachineTranslationService
     {
         return match ($providerName) {
             ProviderName::ETranslation->value => new ETranslation(),
-            ProviderName::AzureOpenAI->value  => new AzureOpenAI(),
+            ProviderName::AzureOpenAI->value  => new AzureOpenAI($institutionId),
             default => throw new RuntimeException("No machine translation provider with name \"$providerName\" exists"),
         };
     }

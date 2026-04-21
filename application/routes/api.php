@@ -38,6 +38,16 @@ Route::prefix('/translate')
             ->name('machine-translation.translate.file.download');
     });
 
+// Institution-scoped settings
+Route::prefix('/settings')
+    ->controller(API\InstitutionSettingsController::class)
+    ->group(function (): void {
+        Route::get('/', 'show')
+            ->name('machine-translation.settings.show');
+        Route::put('/', 'update')
+            ->name('machine-translation.settings.update');
+    });
+
 // eTranslation callback — no auth, called by EU Commission server
 Route::post(
     '/callback/etranslation/{jobId}',

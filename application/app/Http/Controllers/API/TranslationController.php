@@ -83,7 +83,7 @@ class TranslationController extends Controller
     public function translateText(TranslateTextRequest $request): JsonResponse
     {
         $data    = $request->validated();
-        $service = $this->picker->pick($data['provider']);
+        $service = $this->picker->pick($data['provider'], (string) (Auth::user()?->institutionId ?? ''));
 
         try {
             $job = $service->submitTextTranslation(
@@ -138,7 +138,7 @@ class TranslationController extends Controller
     public function submitFileTranslation(TranslateFileRequest $request): JsonResponse
     {
         $data    = $request->validated();
-        $service = $this->picker->pick($data['provider']);
+        $service = $this->picker->pick($data['provider'], (string) (Auth::user()?->institutionId ?? ''));
 
         if (! $service->supportsFileTranslation()) {
             return response()->json(['message' => 'This provider does not support file translation.'], 422);

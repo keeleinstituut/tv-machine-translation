@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Http;
 
 class AzureOpenAIApiClient
 {
+    private string $institutionId;
     private string $endpoint;
     private string $apiKey;
     private string $tenantId;
@@ -17,16 +18,17 @@ class AzureOpenAIApiClient
     private string $apiVersion;
     private int    $timeout;
 
-    public function __construct()
+    public function __construct(array $config, string $institutionId = '')
     {
-        $this->endpoint      = config('machine-translation.azure_openai.endpoint');
-        $this->apiKey        = config('machine-translation.azure_openai.api_key');
-        $this->tenantId      = config('machine-translation.azure_openai.tenant_id');
-        $this->applicationId = config('machine-translation.azure_openai.application_id');
-        $this->clientSecret  = config('machine-translation.azure_openai.client_secret');
-        $this->deployment    = config('machine-translation.azure_openai.deployment');
+        $this->institutionId = $institutionId;
+        $this->endpoint      = $config['endpoint']      ?? '';
+        $this->apiKey        = $config['api_key']        ?? '';
+        $this->tenantId      = $config['tenant_id']      ?? '';
+        $this->applicationId = $config['application_id'] ?? '';
+        $this->clientSecret  = $config['client_secret']  ?? '';
+        $this->deployment    = $config['deployment']     ?? config('machine-translation.azure_openai.deployment');
         $this->apiVersion    = config('machine-translation.azure_openai.api_version');
-        $this->timeout       = config('machine-translation.azure_openai.timeout');
+        $this->timeout       = (int) config('machine-translation.azure_openai.timeout');
     }
 
     /**
@@ -94,7 +96,8 @@ class AzureOpenAIApiClient
      */
     public function fetchAccessToken(): string
     {
-        $cacheKey = 'azure_openai_access_token_' . md5($this->tenantId . $this->applicationId);
+        $cacheKey = 'azure_openai_access_token_' .
+            md5($this->institutionId . $this->tenantId . $this->applicationId);
 
         return Cache::remember($cacheKey, 3300, function () {
             $tokenUrl = "https://login.microsoftonline.com/{$this->tenantId}/oauth2/v2.0/token";
