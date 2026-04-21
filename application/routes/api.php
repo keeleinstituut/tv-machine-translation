@@ -10,8 +10,6 @@ use Illuminate\Support\Facades\Route;
 |--------------------------------------------------------------------------
 */
 
-Route::get('/health', HealthCheckController::class)->withoutMiddleware(['auth:api']);
-
 // Providers
 Route::prefix('/providers')
     ->controller(API\ProviderController::class)
