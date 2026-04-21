@@ -15,7 +15,7 @@ class TranslateFileRequest extends FormRequest
 
     public function rules(): array
     {
-        $domains = array_keys(config('machine-translation.etranslation.domains', []));
+        $domains = config('machine-translation.etranslation.domains', []);
 
         return [
             'provider'        => ['required', 'string', Rule::in([ProviderName::ETranslation->value])],

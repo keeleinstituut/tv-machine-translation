@@ -20,14 +20,20 @@ class AzureOpenAI implements MachineTranslationService
 
     public function getOptions(): array
     {
-        $templates = config('machine-translation.azure_openai.prompt_templates', []);
+        $templateKeys = array_keys(config('machine-translation.azure_openai.prompt_templates', []));
+        $languages    = config('machine-translation.azure_openai.languages', []);
 
-        return [
-            'prompt_templates' => collect($templates)
-                ->map(fn ($t, $key) => ['value' => $key, 'label' => $t['label']])
-                ->values()
-                ->all(),
-        ];
+        $combinations = [];
+        foreach ($languages as $source) {
+            foreach ($languages as $target) {
+                if ($source === $target) continue;
+                $combinations[$source][$target] = $templateKeys;
+            }
+            ksort($combinations[$source]);
+        }
+        ksort($combinations);
+
+        return ['language_combinations' => $combinations];
     }
 
     public function submitTextTranslation(

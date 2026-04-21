@@ -12,13 +12,7 @@ return [
         'callback_basic_auth_password' => env('ETRANSLATION_CALLBACK_BASIC_AUTH_PASSWORD', ''),
 
         'timeout' => (int) env('ETRANSLATION_TIMEOUT', 30),
-        'domains' => [
-            'GEN' => 'General',
-            'LEG' => 'Legal',
-            'IT'  => 'IT',
-            'FIN' => 'Finance',
-            'MED' => 'Medical',
-        ],
+        'domains' => ['GEN', 'SPD', 'ECB', 'IPO', 'QE', 'ECJ'],
     ],
 
     'azure_openai' => [
@@ -31,19 +25,22 @@ return [
         'api_version'    => env('AZURE_OPENAI_API_VERSION', '2024-10-21'),
         'timeout'        => (int) env('AZURE_OPENAI_TIMEOUT', 60),
 
+        'languages' => [
+            'ar', 'bg', 'cs', 'da', 'de', 'el', 'en', 'es', 'et', 'fi', 'fr', 'ga',
+            'hr', 'hu', 'is', 'it', 'ja', 'lt', 'lv', 'mt', 'nb', 'nl', 'nn', 'pl',
+            'pt', 'ro', 'ru', 'sk', 'sl', 'sv', 'tr', 'uk', 'zh', 'zt',
+        ],
+
         'prompt_templates' => [
             'default' => [
-                'label'  => 'Üldine tõlge',
                 'system' => 'You are a professional translator. Translate the provided text from {source_language} to {target_language}. Output only the translated text, nothing else.',
                 'user'   => '{text}',
             ],
             'formal' => [
-                'label'  => 'Ametlik tõlge',
                 'system' => 'You are a professional translator specializing in formal documents. Translate from {source_language} to {target_language} using a formal register. Output only the translated text, nothing else.',
                 'user'   => '{text}',
             ],
             'technical' => [
-                'label'  => 'Tehniline tõlge',
                 'system' => 'You are a technical translator. Translate from {source_language} to {target_language} while preserving all technical terminology accurately. Output only the translated text, nothing else.',
                 'user'   => '{text}',
             ],

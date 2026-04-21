@@ -16,8 +16,8 @@ class TranslateTextRequest extends FormRequest
     public function rules(): array
     {
         $providers  = array_column(ProviderName::cases(), 'value');
-        $domains    = array_keys(config('machine-translation.etranslation.domains', []));
         $templates  = array_keys(config('machine-translation.azure_openai.prompt_templates', []));
+        $domains    = config('machine-translation.etranslation.domains', []);
 
         return [
             'provider'         => ['required', 'string', Rule::in($providers)],

@@ -22,14 +22,36 @@ class ETranslation implements MachineTranslationService
 
     public function getOptions(): array
     {
-        $domains = config('machine-translation.etranslation.domains', []);
+        $allowedDomains = config('machine-translation.etranslation.domains', []);
 
-        return [
-            'domains' => collect($domains)
-                ->map(fn ($label, $value) => ['value' => $value, 'label' => $label])
-                ->values()
-                ->all(),
-        ];
+        $raw = json_decode(
+            file_get_contents(resource_path('etranslation/getDomains.json')),
+            true
+        );
+
+        $combinations = [];
+        foreach ($raw as $entry) {
+            $domainCode = $entry['domain'];
+            if (!in_array($domainCode, $allowedDomains)) continue;
+
+            foreach ($entry['languagePairs'] as $pair) {
+                $parts  = explode('-', $pair);
+                $source = strtolower($parts[0]);
+                $target = strtolower($parts[1]);
+                if ($source === $target) continue;
+                $combinations[$source][$target][] = $domainCode;
+            }
+        }
+
+        foreach ($combinations as $src => &$targets) {
+            foreach ($targets as $tgt => &$modes) {
+                $modes = array_values(array_unique($modes));
+            }
+            ksort($targets);
+        }
+        ksort($combinations);
+
+        return ['language_combinations' => $combinations];
     }
 
     public function submitTextTranslation(
