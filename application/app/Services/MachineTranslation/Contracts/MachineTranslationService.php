@@ -36,6 +36,11 @@ interface MachineTranslationService
     public function supportsFileTranslation(): bool;
 
     /**
+     * Whether this provider is configured and available for the current institution.
+     */
+    public function isConfiguredForInstitution(): bool;
+
+    /**
      * Submit a file for asynchronous translation.
      * Returns a TranslationJob with status 'processing'.
      *

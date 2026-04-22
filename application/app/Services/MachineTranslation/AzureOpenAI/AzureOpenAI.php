@@ -111,6 +111,26 @@ class AzureOpenAI implements MachineTranslationService
         return false;
     }
 
+    public function isConfiguredForInstitution(): bool
+    {
+        if ($this->institutionId === '') {
+            return true;
+        }
+
+        $azureSettings = Setting::getModel()
+            ->where('institution_id', $this->institutionId)
+            ->pluck('value', 'key');
+
+
+        $missingAPIKey = blank($azureSettings->get('azure_openai_api_key'));
+        $missingBearerKeys = collect($azureSettings)
+                                ->forget('azure_openai_api_key')
+                                ->map(blank(...))
+                                ->reduce(fn ($acc, $bool) => $acc || $bool, false);
+
+        return !$missingAPIKey || !$missingBearerKeys;
+    }
+
     public function submitFileTranslation(
         UploadedFile $_file,
         string       $_sourceLanguage,

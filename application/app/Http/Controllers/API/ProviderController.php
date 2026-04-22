@@ -27,17 +27,24 @@ class ProviderController extends Controller
     )]
     public function index(): JsonResponse
     {
+        $institutionId = (string) (Auth::user()?->institutionId ?? '');
+
         $providers = collect(ProviderName::cases())
             ->filter(fn (ProviderName $provider) => Auth::hasPrivilege($provider->requiredPrivilege()))
-            ->map(function (ProviderName $provider) {
-                $service = $this->picker->pick($provider->value);
+            ->map(function (ProviderName $provider) use ($institutionId) {
+                $service = $this->picker->pick($provider->value, $institutionId);
+
+                if (!$service->isConfiguredForInstitution()) {
+                    return null;
+                }
 
                 return [
-                    'name'                     => $provider->value,
-                    'label'                    => $provider->label(),
+                    'name'                      => $provider->value,
+                    'label'                     => $provider->label(),
                     'supports_file_translation' => $service->supportsFileTranslation(),
                 ];
             })
+            ->filter() // Filter out null values
             ->values();
 
         return response()->json(['data' => $providers]);

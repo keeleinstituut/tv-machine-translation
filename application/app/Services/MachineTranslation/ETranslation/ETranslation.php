@@ -102,6 +102,11 @@ class ETranslation implements MachineTranslationService
         return true;
     }
 
+    public function isConfiguredForInstitution(): bool
+    {
+        return true;
+    }
+
     public function submitFileTranslation(
         UploadedFile $file,
         string       $sourceLanguage,
