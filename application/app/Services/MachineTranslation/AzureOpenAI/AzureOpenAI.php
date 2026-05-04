@@ -119,6 +119,14 @@ class AzureOpenAI implements MachineTranslationService
 
         $azureSettings = Setting::getModel()
             ->where('institution_id', $this->institutionId)
+            ->whereIn('key', [
+                'azure_openai_endpoint',
+                'azure_openai_tenant_id',
+                'azure_openai_application_id',
+                'azure_openai_deployment',
+                'azure_openai_api_key',
+                'azure_openai_client_secret',
+            ])
             ->pluck('value', 'key');
 
 
@@ -129,6 +137,17 @@ class AzureOpenAI implements MachineTranslationService
                                 ->reduce(fn ($acc, $bool) => $acc || $bool, false);
 
         return !$missingAPIKey || !$missingBearerKeys;
+    }
+
+    public function isShowUsageConfirmationEnabled(): bool {
+        if ($this->institutionId === '') {
+            return false;
+        }
+
+        return (bool) Setting::where('institution_id', $this->institutionId)
+            ->where('key', 'azure_openai_show_confirmation')
+            ->first()?->value;
+
     }
 
     public function submitFileTranslation(

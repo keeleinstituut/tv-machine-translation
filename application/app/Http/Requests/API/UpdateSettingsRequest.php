@@ -14,7 +14,8 @@ class UpdateSettingsRequest extends FormRequest
             'tenant_id'      => ['sometimes', 'nullable', 'string', 'max:255'],
             'application_id' => ['sometimes', 'nullable', 'string', 'max:255'],
             'client_secret'  => ['sometimes', 'nullable', 'string', 'max:500'],
-            'deployment'     => ['sometimes', 'nullable', 'string', 'max:100'],
+            'deployment'        => ['sometimes', 'nullable', 'string', 'max:100'],
+            'show_confirmation' => ['sometimes', 'boolean'],
         ];
     }
 }

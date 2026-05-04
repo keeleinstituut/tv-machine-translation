@@ -41,6 +41,11 @@ interface MachineTranslationService
     public function isConfiguredForInstitution(): bool;
 
     /**
+     * Whether it should be shown a confirmation for the user when using this provider.
+     */
+    public function isShowUsageConfirmationEnabled(): bool;
+
+    /**
      * Submit a file for asynchronous translation.
      * Returns a TranslationJob with status 'processing'.
      *

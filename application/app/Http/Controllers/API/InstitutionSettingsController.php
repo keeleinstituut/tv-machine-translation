@@ -28,6 +28,7 @@ class InstitutionSettingsController extends Controller
             'deployment'        => $settings->get('azure_openai_deployment'),
             'has_api_key'       => $settings->get('azure_openai_api_key') !== null,
             'has_client_secret' => $settings->get('azure_openai_client_secret') !== null,
+            'show_confirmation' => (bool) $settings->get('azure_openai_show_confirmation'),
         ];
 
         return response()->json(['data' => $data]);

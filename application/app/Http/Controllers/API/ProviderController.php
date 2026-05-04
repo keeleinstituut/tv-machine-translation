@@ -4,6 +4,7 @@ namespace App\Http\Controllers\API;
 
 use App\Enums\ProviderName;
 use App\Http\Controllers\Controller;
+use App\Models\Setting;
 use App\Services\MachineTranslation\MachineTranslationPickerService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
@@ -38,11 +39,14 @@ class ProviderController extends Controller
                     return null;
                 }
 
-                return [
+                $result = [
                     'name'                      => $provider->value,
                     'label'                     => $provider->label(),
                     'supports_file_translation' => $service->supportsFileTranslation(),
+                    'show_confirmation'         => $service->isShowUsageConfirmationEnabled(),
                 ];
+
+                return $result;
             })
             ->filter() // Filter out null values
             ->values();
