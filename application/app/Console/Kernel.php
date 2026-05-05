@@ -9,7 +9,7 @@ class Kernel extends ConsoleKernel
 {
     protected function schedule(Schedule $schedule): void
     {
-        //
+        $schedule->command('app:delete-old-translation-jobs')->everyFifteenMinutes();
     }
 
     protected function commands(): void
