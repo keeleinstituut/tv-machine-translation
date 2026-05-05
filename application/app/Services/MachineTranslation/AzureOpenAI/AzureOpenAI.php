@@ -57,14 +57,17 @@ class AzureOpenAI implements MachineTranslationService
 
     public function getOptions(): array
     {
-        $templateKeys = array_keys(config('machine-translation.azure_openai.prompt_templates', []));
-        $languages    = config('machine-translation.azure_openai.languages', []);
+        $allTemplateKeys       = array_keys(config('machine-translation.azure_openai.prompt_templates', []));
+        $crossLangTemplates    = array_values(array_filter($allTemplateKeys, fn($k) => $k !== 'translation_edited'));
+        $sameLanguageTemplates = ['translation_edited'];
+        $languages             = config('machine-translation.azure_openai.languages', []);
 
         $combinations = [];
         foreach ($languages as $source) {
             foreach ($languages as $target) {
-                if ($source === $target) continue;
-                $combinations[$source][$target] = $templateKeys;
+                $combinations[$source][$target] = $source === $target
+                    ? $sameLanguageTemplates
+                    : $crossLangTemplates;
             }
             ksort($combinations[$source]);
         }
